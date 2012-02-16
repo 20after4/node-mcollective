@@ -1,0 +1,13 @@
+{
+  "name": "mcollective",
+  "description": "MCollective Client",
+  "version": "0.0.1",
+  "engines": { "node": ">= 0.4" },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/silas/node-mcollective.git"
+  },
+  "bugs": { "url" : "http://github.com/silas/node-mcollective/issues" },
+  "main": "./lib/mcollective"
+}

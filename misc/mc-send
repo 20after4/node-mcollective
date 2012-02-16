@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+require 'mcollective'
+
+include MCollective::RPC
+
+def error(msg)
+  abort msg
+end
+
+begin
+  input = JSON.load(STDIN.read)
+rescue Interrupt
+  error 'interrupted'
+rescue JSON::ParserError
+  error 'parse error'
+end
+
+data = {}
+
+unless input.has_key?('agent')
+  error 'agent required'
+end
+
+unless input.has_key?('action')
+  error 'action required'
+end
+
+if input.has_key?('data')
+  unless input['data'].is_a?(Hash)
+    error 'data must be a hash'
+  end
+  input['data'].each do |key, value|
+    data[key.to_sym] = value
+  end
+end
+
+options = {
+  :verbose     => false,
+  :disctimeout => 5,
+  :timeout     => 60,
+  :config      => '/etc/mcollective/client.cfg',
+  :collective  => nil,
+  :filter      => {
+    'fact'     => [],
+    'cf_class' => [],
+    'agent'    => [],
+    'identity' => [],
+  }
+}
+
+if input.has_key?('options')
+  unless input['options'].is_a?(Hash)
+    error 'options must be a hash'
+  end
+
+  if input['options'].has_key?('client_conf')
+    unless input['options']['client_conf'].is_a?(String)
+      error 'client_conf must be a string'
+    end
+    options[:config] = input['options']['client_conf']
+  end
+
+  if input['options'].has_key?('discovery_timeout')
+    unless input['options']['discovery_timeout'].is_a?(Integer)
+      error 'discovery_timeout must be an integer'
+    end
+    options[:disctimeout] = input['options']['discovery_timeout']
+  end
+
+  if input['options'].has_key?('timeout')
+    unless input['options']['timeout'].is_a?(Integer)
+      error 'timeout must be an integer'
+    end
+    options[:timeout] = input['options']['timeout']
+  end
+end
+
+rpc = rpcclient(input['agent'], { :options => options })
+
+methods = {
+  'agent' => rpc.method(:agent_filter),
+  'class' => rpc.method(:class_filter),
+  'fact' => rpc.method(:fact_filter),
+  'identity' => rpc.method(:identity_filter),
+}
+
+if input.has_key?('filter')
+  methods.each { |type, func|
+    if input['filter'].has_key?(type)
+      unless input['filter'][type].is_a?(Array)
+        error type + ' must be an array'
+      end
+      input['filter'][type].each { |value|
+        if type == 'fact'
+          unless value.is_a?(Array)
+            error 'fact must be an array'
+          end
+          func.call(value[0], value[1])
+        else
+          func.call(value)
+        end
+      }
+    end
+  }
+end
+
+rpc.discover
+
+begin
+  rpc.send(input['action'], data) do |res|
+    puts JSON.dump(res)
+  end
+rescue MCollective::DDLValidationError => e
+  error e.to_s
+end
