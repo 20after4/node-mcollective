@@ -2,7 +2,7 @@
   "name": "mcollective",
   "description": "MCollective Client",
   "version": "0.0.1",
-  "author": "Silas Sewell",
+  "author": "Silas Sewell <silas@sewell.org>",
   "engines": { "node": ">= 0.4" },
   "dependencies": {},
   "repository": {
