@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
+require 'json'
 require 'mcollective'
 
 include MCollective::RPC
