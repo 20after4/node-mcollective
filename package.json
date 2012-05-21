@@ -1,7 +1,7 @@
 {
   "name": "mcollective",
   "description": "MCollective Client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Silas Sewell <silas@sewell.org>",
   "engines": { "node": ">= 0.4" },
   "dependencies": {},
