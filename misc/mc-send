@@ -37,19 +37,7 @@ if input.has_key?('data')
   end
 end
 
-options = {
-  :verbose     => false,
-  :disctimeout => 5,
-  :timeout     => 60,
-  :config      => '/etc/mcollective/client.cfg',
-  :collective  => nil,
-  :filter      => {
-    'fact'     => [],
-    'cf_class' => [],
-    'agent'    => [],
-    'identity' => [],
-  }
-}
+options = MCollective::Util.default_options
 
 if input.has_key?('options')
   unless input['options'].is_a?(Hash)
